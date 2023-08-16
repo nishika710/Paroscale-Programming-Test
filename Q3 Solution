@@ -1,0 +1,48 @@
+3.	Write a script on any language to get the list of running PID by parsing “top” command
+Explanation:
+top is a Linux command, which shows all the processes in the system. The problem is to write a script that parses the output of top and provides the PIDs and users in the system . Consider the output of top is given a file input to you.
+
+C++ Code:
+
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <map>
+
+int main() {
+    std::ifstream inputFile("top_output.txt"); // it will be Replaced with the actual input filename
+
+    if (!inputFile.is_open()) {
+        std::cerr << "Failed to open input file." << std::endl;
+        return 1;
+    }
+
+    std::string line;
+    std::map<int, std::string> pidUserMap;
+
+    while (std::getline(inputFile, line)) {
+        // Find lines containing PID and user information
+        size_t pidPos = line.find_first_of(" ");
+        size_t userPos = line.find_last_of(" ");
+
+        if (pidPos != std::string::npos && userPos != std::string::npos) {
+            int pid = std::stoi(line.substr(pidPos, userPos - pidPos));
+            std::string user = line.substr(userPos + 1);
+
+            pidUserMap[pid] = user;
+        }
+    }
+
+    inputFile.close();
+
+    std::cout << "Running PIDs and Users:" << std::endl;
+    for (const auto& entry : pidUserMap) {
+        std::cout << "PID: " << entry.first << ", User: " << entry.second << std::endl;
+    }
+
+    return 0;
+}
+
+
