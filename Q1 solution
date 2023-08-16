@@ -2,7 +2,7 @@
 Explanation:
 Have a global list / array where two or more producers append randomly generated numbers concurrently. A consumer thread must dequeue from the global list and print it!
 
-Code:
+C++ Code:
 
 #include <iostream>
 #include <thread>
