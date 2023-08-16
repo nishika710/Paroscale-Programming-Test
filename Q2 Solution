@@ -1,0 +1,55 @@
+2. Write a C/C++/Go program to iterate a linux directory tree and count the number of files and number of subdirectories in each directory. Also Count the total number
+of files and directories in the directory tree. Implement the logic using multi-threading to improve the scanning of the directory.
+
+C++ Code:
+
+#include <iostream>
+#include <filesystem>
+#include <thread>
+#include <mutex>
+#include <atomic>
+
+namespace fs = std::filesystem;
+
+std::mutex mtx;
+std::atomic<int> totalFiles(0);
+std::atomic<int> totalDirs(0);
+
+void countFilesAndDirs(const fs::path& dirPath) {
+    int localFiles = 0;
+    int localDirs = 0;
+
+    for (const auto& entry : fs::directory_iterator(dirPath)) {
+        if (entry.is_regular_file()) {
+            localFiles++;
+        } else if (entry.is_directory()) {
+            localDirs++;
+            countFilesAndDirs(entry.path()); // Recursive call for subdirectories
+        }
+    }
+
+    {
+        std::lock_guard<std::mutex> lock(mtx);
+        totalFiles += localFiles;
+        totalDirs += localDirs;
+        std::cout << "Directory: " << dirPath << "\n"
+                  << "   Files: " << localFiles << "\n"
+                  << "   Subdirectories: " << localDirs << "\n"
+                  << "------------------------\n";
+    }
+}
+
+int main() {
+    fs::path rootDir = "C:/Users/hp/Desktop/placement"; 
+
+    if (fs::exists(rootDir) && fs::is_directory(rootDir)) {
+        countFilesAndDirs(rootDir);
+
+        std::cout << "\nTotal Files: " << totalFiles << "\n"
+                  << "Total Directories: " << totalDirs << "\n";
+    } else {
+        std::cerr << "Invalid directory path.\n";
+    }
+
+    return 0;
+}
